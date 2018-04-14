@@ -1,0 +1,83 @@
+---
+title: "citi-bike-analysis-3"
+author: "Amelia Chu"
+date: "4/1/2018"
+output: html_document
+---
+
+```{r}
+library("forecast")
+```
+
+```{r}
+data <- read.csv("/Users/chuamelia/Google Drive/Forecasting Time Series/citi-bike/newBikeDFNoZero.csv")
+date <- as.Date(data$Date)
+time <- 1:length(date)
+trips <- data$Trips
+```
+
+```{r}
+plot(date,log(data$Miles),type="l",col="blue")
+#lines(date,log(data$revenue),col="red")
+lines(date,log(data$Trips),col="green")
+```
+
+```{r}
+summary(data)
+```
+
+```{r}
+log.trips <- log(trips)
+diff.log.trips <- c(NA, diff(log.trips))
+diff2.log.trips <- c(NA, diff(diff.log.trips))
+```
+
+```{r}
+# Time series plot
+plot(date, trips, type="l", xlab="Date", ylab="Trips")
+plot(date, log.trips, type="l", xlab="Date", ylab="Log Trips")
+plot(date, diff.log.trips, type="l", xlab="Date", ylab="Diff Log Trips")
+plot(date, diff2.log.trips, type="l", xlab="Date", ylab="Diff2 Log Trips")
+```
+```{r}
+plot(date, log.trips, type="l", xlab="Date", ylab="Log Trips")
+acf(log.trips, na.action = na.pass)
+pacf(log.trips, na.action = na.pass)
+```
+
+```{r}
+plot(date, diff.log.trips, type="l", xlab="Date", ylab="Log Trips")
+acf(diff.log.trips, na.action = na.pass)
+pacf(diff.log.trips, na.action = na.pass)
+```
+```{r}
+plot(date, diff2.log.trips, type="l", xlab="Date", ylab="Diff2 Log Trips")
+acf(diff2.log.trips, na.action = na.pass)
+pacf(diff2.log.trips, na.action = na.pass)
+```
+
+
+```{r}
+Arima(log.trips, c(0, 0, 0), include.constant=TRUE)$aicc
+Arima(log.trips, c(1, 0, 0), include.constant=TRUE)$aicc
+Arima(log.trips, c(2, 0, 0), include.constant=TRUE)$aicc
+Arima(log.trips, c(0, 0, 1), include.constant=TRUE)$aicc
+Arima(log.trips, c(1, 0, 1), include.constant=TRUE)$aicc
+Arima(log.trips, c(2, 0, 1), include.constant=TRUE)$aicc
+Arima(log.trips, c(0, 0, 2), include.constant=TRUE)$aicc
+Arima(log.trips, c(1, 0, 2), include.constant=TRUE)$aicc
+Arima(log.trips, c(2, 0, 2), include.constant=TRUE)$aicc
+```
+
+```{r}
+Arima(log.trips, c(0, 0, 0), include.constant=FALSE)$aicc
+Arima(log.trips, c(1, 0, 0), include.constant=FALSE)$aicc
+Arima(log.trips, c(2, 0, 0), include.constant=FALSE)$aicc
+Arima(log.trips, c(0, 0, 1), include.constant=FALSE)$aicc
+Arima(log.trips, c(1, 0, 1), include.constant=FALSE)$aicc
+#Arima(log.trips, c(2, 0, 1), include.constant=FALSE)$aicc
+Arima(log.trips, c(0, 0, 2), include.constant=FALSE)$aicc
+Arima(log.trips, c(1, 0, 2), include.constant=FALSE)$aicc
+#Arima(log.trips, c(2, 0, 2), include.constant=FALSE)$aicc
+```
+

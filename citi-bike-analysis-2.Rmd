@@ -1,0 +1,131 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+```{r}
+x <- cumsum(rnorm(1000))
+plot(x, type="l")
+fit2<- Arima(x, c(1, 1, 0), include.constant=FALSE)
+
+plot(forecast(fit2, h=100, level=95), col=2)
+```
+
+```{r}
+library("forecast")
+```
+
+```{r}
+data <- read.csv("/Users/chuamelia/Google Drive/Forecasting Time Series/citi-bike/aggTripsMonthly.csv")
+date <- as.Date(data$MonthYear)
+time <- 1:length(date)
+trips <- data$Trips
+```
+
+```{r}
+# Time series plot
+plot(date, data$Trips, type="l",
+     xlab="Date", ylab="Trips")
+```
+
+
+```{r}
+log.trips <- log(trips)
+diff.log.trips <- c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, diff(log.trips, lag = 12))
+diff2.log.trips <- c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, diff(diff.log.trips, lag =12))
+diff3.log.trips <- c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, diff(diff2.log.trips, lag =12))
+
+plot(date, data$Trips, type="l",
+     xlab="Date", ylab="Trips")
+plot(date, log.trips, type="l",
+     xlab="Date", ylab=" Log Trips")
+
+plot(date, diff.log.trips, type="l",
+     xlab="Date", ylab="Diff Log Trips")
+plot(date, diff2.log.trips, type="l",
+     xlab="Date", ylab="Diff 2 Log Trips")
+lines(date, diff3.log.trips, type="l",
+     xlab="Date", ylab="Diff 3 Log Trips")
+```
+
+```{r}
+# Time series plot
+plot(date, trips, type="l",
+     xlab="Date", ylab="Trips w/o Seasonal")
+```
+
+```{r}
+# Time series plot
+plot(as.Date(data$MonthYear), log.trips, type="l",
+     xlab="Date", ylab="Log Trips")
+# ACF and PACF
+acf(log.trips, na.action = na.pass)
+pacf(log.trips, na.action = na.pass)
+```
+
+```{r}
+# Time series plot
+plot(as.Date(data$MonthYear), diff.log.trips, type="l",
+     xlab="Date", ylab="Diff Log Trips")
+# ACF and PACF
+acf(diff.log.trips, na.action = na.pass)
+pacf(diff.log.trips, na.action = na.pass)
+```
+```{r}
+# Time series plot
+plot(as.Date(data$MonthYear), diff2.log.trips, type="l",
+     xlab="Date", ylab="Diff2 Log Trips")
+# ACF and PACF
+acf(diff2.log.trips, na.action = na.pass)
+pacf(diff2.log.trips, na.action = na.pass)
+```
+```{r}
+Arima(log.trips, c(1, 1, 0), include.constant=TRUE)$aicc
+Arima(log.trips, c(2, 1, 0), include.constant=TRUE)$aicc
+Arima(log.trips, c(0, 1, 0), include.constant=TRUE)$aicc
+Arima(log.trips, c(1, 1, 1), include.constant=TRUE)$aicc
+Arima(log.trips, c(2, 1, 1), include.constant=TRUE)$aicc
+Arima(log.trips, c(0, 1, 1), include.constant=TRUE)$aicc
+Arima(log.trips, c(1, 1, 2), include.constant=TRUE)$aicc
+Arima(log.trips, c(2, 1, 2), include.constant=TRUE)$aicc
+Arima(log.trips, c(0, 1, 2), include.constant=TRUE)$aicc
+```
+
+```{r}
+Arima(log.trips, c(0, 0, 0), include.constant=FALSE)$aicc
+#Arima(log.trips, c(1, 0, 0), include.constant=FALSE)$aicc
+Arima(log.trips, c(1, 1, 0), include.constant=TRUE)$aicc
+Arima(diff.log.trips, c(1, 0, 0), include.constant=TRUE)$aicc
+Arima(diff.log.trips, c(1, 0, 0), include.constant=FALSE)$aicc
+Arima(diff.log.trips, c(2, 0, 0), include.constant=TRUE)$aicc
+```
+```{r}
+fit <- Arima(diff.log.trips, c(1, 0, 0), include.constant=TRUE)
+print(fit)
+```
+
+```{r}
+# Hint: use Box.test function.  You must call this function four times,
+# for lags 12, 24, 36, and 48.
+Box.test(diff.log.trips, lag = 12, type = c("Box-Pierce", "Ljung-Box"), fitdf = 0)
+Box.test(diff.log.trips, lag = 24, type = c("Box-Pierce", "Ljung-Box"), fitdf = 0)
+Box.test(diff.log.trips, lag = 36, type = c("Box-Pierce", "Ljung-Box"), fitdf = 0)
+Box.test(diff.log.trips, lag = 48, type = c("Box-Pierce", "Ljung-Box"), fitdf = 0)
+```
+
+```{r}
+# Add TS plot, ACF, and PACF
+resid.log.trips <- residuals(fit)
+# Time series plot
+plot(as.Date(data$MonthYear), resid.log.trips, type="l",
+     xlab="Date", ylab="Log Trips Residuals")
+# ACF and PACF
+acf(resid.log.trips, na.action = na.pass)
+pacf(resid.log.trips, na.action = na.pass)
+```
+
+```{r}
+plot(forecast(fit, h=30, level=95), col=2)
+```
+
